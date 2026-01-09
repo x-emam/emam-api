@@ -1,0 +1,17 @@
+{
+  "name": "emam-apis",
+   "Author":"emam",
+  "version": "1.0.0",
+  "description": "Test Api Lib by Emam",
+  "main": "index.js",
+  "type": "module",
+  "keywords": ["apis", "ai", "tools"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.3.0",
+    "fs": "0.0.1-security"
+  }
+}
