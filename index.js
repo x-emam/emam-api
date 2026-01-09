@@ -34,19 +34,23 @@ async function loadDirectory(dir, baseObj) {
         if (useModuleMode) {
           baseObj[moduleName] = moduleContent.default || moduleContent;
         } else {
+          if (moduleContent.default) {
+            Object.assign(baseObj, moduleContent.default);
+          }
           Object.keys(moduleContent).forEach(key => {
-            baseObj[key] = moduleContent[key];
+            if (key !== 'default') {
+              baseObj[key] = moduleContent[key];
+            }
           });
         }
       } catch (error) {
-        console.error(`Error loading ${fullPath}:`, error.message);
+        baseObj[moduleName] = `Error: ${error.message}`;
       }
     }
   }
 }
 
 await loadDirectory(apisDir, apis);
-
 
 export { apis };
 export default apis;
