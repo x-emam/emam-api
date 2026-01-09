@@ -1,4 +1,4 @@
-import setting from '../../default.js';
+import setting from '../default.js';
 
 const {
   client
