@@ -47,6 +47,6 @@ async function loadDirectory(dir, baseObj) {
 
 await loadDirectory(apisDir, apis);
 
-const result = apis;
-export { result };
+
+export { apis };
 export default apis;
