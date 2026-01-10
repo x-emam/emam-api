@@ -59,5 +59,5 @@ async function loadDirectory(dir, baseObj) {
   await loadDirectory(apisDir, apis);
 })();
 
-export { apis };
+export { apis  as emam };
 export default apis;
