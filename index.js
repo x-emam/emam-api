@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-
+const createor = "emam abolela"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -59,5 +59,5 @@ async function loadDirectory(dir, baseObj) {
   await loadDirectory(apisDir, apis);
 })();
 
-export { apis };
+export { apis, createor};
 export default apis;
