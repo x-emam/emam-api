@@ -21,7 +21,7 @@ async function loadDirectory(dir, baseObj) {
       baseObj[item] = {};
       await loadDirectory(fullPath, baseObj[item]);
     } else if (stat.isFile() && item.endsWith('.js')) {
-      const moduleName = path.basename(item, '.js');
+      const moduleName = item.replace('.js', '');
       
       try {
         const moduleUrl = pathToFileURL(fullPath).href;
@@ -37,11 +37,16 @@ async function loadDirectory(dir, baseObj) {
           if (moduleContent.default) {
             Object.assign(baseObj, moduleContent.default);
           }
+          
           Object.keys(moduleContent).forEach(key => {
             if (key !== 'default') {
               baseObj[key] = moduleContent[key];
             }
           });
+          
+          if (!Object.keys(moduleContent).length) {
+            baseObj[moduleName] = 'Empty module';
+          }
         }
       } catch (error) {
         baseObj[moduleName] = `Error: ${error.message}`;
