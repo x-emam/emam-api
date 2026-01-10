@@ -1,8 +1,8 @@
-import setting from '../default.js';
+import axios from 'axios';
 
-const {
-  client
-} = setting;
+const client = axios.create({
+  baseURL: "https://emam-api.web.id"
+});
 
 const qwenChat = async (q, options = {}) => {
   const { 
@@ -29,13 +29,19 @@ const qwenChat = async (q, options = {}) => {
   if (audio) body.audio = audio;
   if (document) body.document = document;
 
-  const res = await client('/home/sections/Ai/api/qwen-chat', {
-    method: 'POST',
-    data: body
-  });
-  
-  return res.answer;
+  try {
+    const res = await client.request({
+      url: '/home/sections/Ai/api/qwen-chat',
+      method: 'POST',
+      data: body
+    });
+    
+    return res.data.answer; 
+  } catch (error) {
+    console.error('Error in qwenChat:', error);
+    throw error;
+  }
 };
 
 export { qwenChat };
-export default qwenChat
+export default qwenChat;
