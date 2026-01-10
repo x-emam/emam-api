@@ -5,12 +5,11 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const result = {};
 const apisDir = path.join(__dirname, 'apis');
 
-async function loadDirectory(dir) {
-  const exports = {};
-  
-  if (!fs.existsSync(dir)) return exports;
+async function loadDirectory(dir, baseObj) {
+  if (!fs.existsSync(dir)) return;
   
   const items = fs.readdirSync(dir);
   
@@ -19,7 +18,8 @@ async function loadDirectory(dir) {
     const stat = fs.statSync(fullPath);
     
     if (stat.isDirectory()) {
-      exports[item] = await loadDirectory(fullPath);
+      baseObj[item] = {};
+      await loadDirectory(fullPath, baseObj[item]);
     } else if (stat.isFile() && item.endsWith('.js')) {
       const moduleName = item.replace('.js', '');
       
@@ -32,33 +32,34 @@ async function loadDirectory(dir) {
         const useModuleMode = firstLine === '"runInMoudel"' || firstLine === "'runInMoudel'" || firstLine === 'runInMoudel';
         
         if (useModuleMode) {
-          exports[moduleName] = moduleContent.default || moduleContent;
+          baseObj[moduleName] = moduleContent.default || moduleContent;
         } else {
           if (moduleContent.default) {
-            Object.assign(exports, moduleContent.default);
+            Object.assign(baseObj, moduleContent.default);
           }
           
           Object.keys(moduleContent).forEach(key => {
             if (key !== 'default') {
-              exports[key] = moduleContent[key];
+              baseObj[key] = moduleContent[key];
             }
           });
+          
+          if (!Object.keys(moduleContent).length) {
+            baseObj[moduleName] = 'Empty module';
+          }
         }
       } catch (error) {
-        exports[moduleName] = `Error: ${error.message}`;
+        baseObj[moduleName] = `Error: ${error.message}`;
       }
     }
   }
-  
-  return exports;
 }
 
-const loaded = await loadDirectory(apisDir);
+(async () => {
+  await loadDirectory(apisDir, result);
+})();
 
-// Export {name: value}
-Object.keys(loaded).forEach(key => {
-  exports[key] = loaded[key];
-});
+const apis = result;
 
-// Export {default: }
-export default loaded;
+export default apis;
+export { apis as emam };
