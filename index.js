@@ -10,40 +10,40 @@ const apisDir = path.join(__dirname, 'apis');
 
 async function loadDirectory(dir, baseObj) {
   if (!fs.existsSync(dir)) return;
-  
+
   const items = fs.readdirSync(dir);
-  
+
   for (const item of items) {
     const fullPath = path.join(dir, item);
     const stat = fs.statSync(fullPath);
-    
+
     if (stat.isDirectory()) {
       baseObj[item] = {};
       await loadDirectory(fullPath, baseObj[item]);
     } else if (stat.isFile() && item.endsWith('.js')) {
       const moduleName = item.replace('.js', '');
-      
+
       try {
         const moduleUrl = pathToFileURL(fullPath).href;
         const moduleContent = await import(moduleUrl);
-        
+
         const fileContent = fs.readFileSync(fullPath, 'utf8');
         const firstLine = fileContent.split('\n')[0].trim();
         const useModuleMode = firstLine === '"runInMoudel"' || firstLine === "'runInMoudel'" || firstLine === 'runInMoudel';
-        
+
         if (useModuleMode) {
           baseObj[moduleName] = moduleContent.default || moduleContent;
         } else {
           if (moduleContent.default) {
             Object.assign(baseObj, moduleContent.default);
           }
-          
+
           Object.keys(moduleContent).forEach(key => {
             if (key !== 'default') {
               baseObj[key] = moduleContent[key];
             }
           });
-          
+
           if (!Object.keys(moduleContent).length) {
             baseObj[moduleName] = 'Empty module';
           }
@@ -55,9 +55,35 @@ async function loadDirectory(dir, baseObj) {
   }
 }
 
-(async () => {
-  await loadDirectory(apisDir, apis);
-})();
+let apisLoaded = false;
+let apisPromise = null;
 
-export { apis  as emam };
-export default apis;
+async function loadApis() {
+  if (!apisPromise) {
+    apisPromise = (async () => {
+      await loadDirectory(apisDir, apis);
+      apisLoaded = true;
+      return apis;
+    })();
+  }
+  return await apisPromise;
+}
+
+const loadedApis = await loadApis();
+
+const emam = loadedApis;
+const defaultExport = loadedApis;
+
+export {
+  emam,
+  loadedApis as apis,
+  loadedApis as default
+};
+
+Object.keys(loadedApis).forEach(key => {
+  if (key !== 'default' && !exports.hasOwnProperty(key)) {
+    exports[key] = loadedApis[key];
+  }
+});
+
+export default defaultExport;
