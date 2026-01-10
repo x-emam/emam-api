@@ -44,4 +44,3 @@ const qwenChat = async (q, options = {}) => {
 };
 
 export { qwenChat };
-export default qwenChat;
