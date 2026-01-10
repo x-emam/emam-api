@@ -1,15 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-const createor = "emam abolela"
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const apis = {};
 const apisDir = path.join(__dirname, 'apis');
 
-async function loadDirectory(dir, baseObj) {
-  if (!fs.existsSync(dir)) return;
+async function loadDirectory(dir) {
+  const exports = {};
+  
+  if (!fs.existsSync(dir)) return exports;
   
   const items = fs.readdirSync(dir);
   
@@ -18,8 +19,7 @@ async function loadDirectory(dir, baseObj) {
     const stat = fs.statSync(fullPath);
     
     if (stat.isDirectory()) {
-      baseObj[item] = {};
-      await loadDirectory(fullPath, baseObj[item]);
+      exports[item] = await loadDirectory(fullPath);
     } else if (stat.isFile() && item.endsWith('.js')) {
       const moduleName = item.replace('.js', '');
       
@@ -32,32 +32,33 @@ async function loadDirectory(dir, baseObj) {
         const useModuleMode = firstLine === '"runInMoudel"' || firstLine === "'runInMoudel'" || firstLine === 'runInMoudel';
         
         if (useModuleMode) {
-          baseObj[moduleName] = moduleContent.default || moduleContent;
+          exports[moduleName] = moduleContent.default || moduleContent;
         } else {
           if (moduleContent.default) {
-            Object.assign(baseObj, moduleContent.default);
+            Object.assign(exports, moduleContent.default);
           }
           
           Object.keys(moduleContent).forEach(key => {
             if (key !== 'default') {
-              baseObj[key] = moduleContent[key];
+              exports[key] = moduleContent[key];
             }
           });
-          
-          if (!Object.keys(moduleContent).length) {
-            baseObj[moduleName] = 'Empty module';
-          }
         }
       } catch (error) {
-        baseObj[moduleName] = `Error: ${error.message}`;
+        exports[moduleName] = `Error: ${error.message}`;
       }
     }
   }
+  
+  return exports;
 }
 
-(async () => {
-  await loadDirectory(apisDir, apis);
-})();
+const loaded = await loadDirectory(apisDir);
 
-export { apis, createor};
-export default apis;
+// Export {name: value}
+Object.keys(loaded).forEach(key => {
+  exports[key] = loaded[key];
+});
+
+// Export {default: }
+export default loaded;
