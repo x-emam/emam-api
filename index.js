@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const result = {};
+const apis = {};
 const apisDir = path.join(__dirname, 'apis');
 
 async function loadDirectory(dir, baseObj) {
@@ -56,10 +56,8 @@ async function loadDirectory(dir, baseObj) {
 }
 
 (async () => {
-  await loadDirectory(apisDir, result);
+  await loadDirectory(apisDir, apis);
 })();
 
-const apis = result;
-
+export { apis };
 export default apis;
-export { apis as emam };
