@@ -1,5 +1,3 @@
-( async() =>
-{
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -57,8 +55,9 @@ async function loadDirectory(dir, baseObj) {
   }
 }
 
-await loadDirectory(apisDir, apis);
+(async () => {
+  await loadDirectory(apisDir, apis);
+})();
 
 export { apis };
 export default apis;
-})()
